@@ -3,6 +3,8 @@ if &compatible
   set nocompatible
 endif
 
+runtime! plugin/python_setup.vim
+
 set runtimepath+=$HOME/.dein/repos/github.com/Shougo/dein.vim
 
 if dein#load_state(expand('$HOME/.dein'))
@@ -12,20 +14,14 @@ if dein#load_state(expand('$HOME/.dein'))
   call dein#add(expand('$HOME/.dein/repos/github.com/Shougo/dein.vim'))
 
   " Plugins
-  call dein#add('bazelbuild/vim-bazel')
-  call dein#add('carlitux/deoplete-ternjs')
   call dein#add('fatih/vim-go')
-  call dein#add('google/vim-maktaba')
-  call dein#add('ianks/vim-tsx') " highlighting issues when not last
+  call dein#add('ianks/vim-tsx')
   call dein#add('icymind/NeoSolarized')
   call dein#add('leafgarland/typescript-vim')
-  call dein#add('mhartington/nvim-typescript')
+  call dein#add('mhartington/nvim-typescript', { 'build': 'yarn global add typescript' })
   call dein#add('pangloss/vim-javascript')
-  call dein#add('prettier/vim-prettier', { 'build': 'yarn install' })
-  call dein#add('Quramy/tsuquyomi', { 'build': 'yarn global add typescript' })
   call dein#add('Shougo/denite.nvim')
   call dein#add('Shougo/deoplete.nvim')
-  call dein#add('ternjs/tern_for_vim', { 'build': 'yarn global add tern' })
   call dein#add('thinca/vim-qfreplace')
 
   call dein#end()
@@ -74,6 +70,9 @@ set completeopt-=preview
 set termguicolors
 set background=light
 colorscheme NeoSolarized
+
+" Syntax
+autocmd BufNewFile,BufRead Supfile set syntax=yaml
 
 " deoplete.nvim
 let g:deoplete#enable_at_startup = 1
