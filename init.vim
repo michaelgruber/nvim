@@ -75,6 +75,16 @@ colorscheme NeoSolarized
 autocmd BufNewFile,BufRead Supfile set syntax=yaml
 autocmd BufNewFile,BufRead *.BUILD set syntax=bzl
 
+" Functions
+function InitWorkspace()
+  :new
+  :wincmd J
+  :resize 15
+  :set winfixheight
+  :terminal
+endfunction
+nnoremap <C-i> :call InitWorkspace()<CR>
+
 " deoplete.nvim
 let g:deoplete#enable_at_startup = 1
 
