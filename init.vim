@@ -14,15 +14,20 @@ if dein#load_state(expand('$HOME/.dein'))
   call dein#add(expand('$HOME/.dein/repos/github.com/Shougo/dein.vim'))
 
   " Plugins
+  call dein#add('carlitux/deoplete-ternjs', { 'build': 'yarn global add tern' })
   call dein#add('fatih/vim-go')
   call dein#add('ianks/vim-tsx')
   call dein#add('icymind/NeoSolarized')
+  call dein#add('jsfaint/gen_tags.vim')
   call dein#add('leafgarland/typescript-vim')
   call dein#add('mhartington/nvim-typescript', { 'build': 'yarn global add typescript' })
   call dein#add('pangloss/vim-javascript')
   call dein#add('Shougo/denite.nvim')
+  call dein#add('Shougo/deoplete-clangx')
   call dein#add('Shougo/deoplete.nvim')
+  call dein#add('Shougo/neoinclude.vim')
   call dein#add('thinca/vim-qfreplace')
+  call dein#add('zchee/deoplete-go')
 
   call dein#end()
   call dein#save_state()
@@ -75,6 +80,9 @@ colorscheme NeoSolarized
 autocmd BufNewFile,BufRead Supfile set syntax=yaml
 autocmd BufNewFile,BufRead *.BUILD set syntax=bzl
 
+" E=Explore. Always.
+command! -nargs=* -bar -bang -count=0 -complete=dir	E call netrw#Explore(<count>,0,0+<bang>0,<q-args>)
+
 " Functions
 function InitWorkspace()
   :new
@@ -92,6 +100,8 @@ call deoplete#custom#source('_', 'matchers', ['matcher_fuzzy',
   \ 'matcher_length'])
 
 " denite.nvim
+call denite#custom#source('tag', 'matchers', ['matcher/substring'])
+
 call denite#custom#var('file_rec', 'command',
   \ ['pt', '--follow', '--nocolor', '--nogroup', '-l', ''])
 
@@ -132,12 +142,9 @@ call denite#custom#map(
 nnoremap <C-p> :<C-u>Denite file_rec<CR>
 nnoremap <C-f> :<C-u>Denite grep<CR>
 
-" Tsuquyomi
-let g:tsuquyomi_shortest_import_path = 1
-
-" vim-prettier
-let g:prettier#quickfix_enabled = 0
-let g:prettier#autoformat = 0
+" gen_tags.vim
+let g:loaded_gentags#gtags=1
+let g:gen_tags#ctags_auto_gen=1
 
 " Windows
 if has('win32')
