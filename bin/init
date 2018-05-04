@@ -1,0 +1,11 @@
+#!/bin/bash -ex
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DEST="${HOME}/.config/nvim"
+
+rm -rf "${HOME}/.dein"
+mkdir -p $DEST
+
+git clone "git@github.com:Shougo/dein.vim.git" "${HOME}/.dein/repos/github.com/Shougo/dein.vim"
+
+ln -fs "${DIR}/init.vim" "${DEST}/init.vim"
