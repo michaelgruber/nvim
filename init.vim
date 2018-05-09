@@ -91,7 +91,7 @@ function InitWorkspace()
   :set winfixheight
   :terminal
 endfunction
-nnoremap <C-i> :call InitWorkspace()<CR>
+nnoremap <LEADER>t :call InitWorkspace()<CR>
 
 " deoplete.nvim
 let g:deoplete#enable_at_startup = 1
