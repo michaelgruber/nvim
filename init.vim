@@ -142,8 +142,26 @@ call denite#custom#map(
   \ '<denite:do_action:qfreplace>',
   \ 'noremap'
   \)
+call denite#custom#map(
+  \ 'normal',
+  \ 'a',
+  \ '<denite:do_action:add>',
+  \ 'noremap'
+  \)
+call denite#custom#map(
+  \ 'normal',
+  \ 'c',
+  \ '<denite:do_action:reset>',
+  \ 'noremap'
+  \)
+call denite#custom#map(
+  \ 'normal',
+  \ 'd',
+  \ '<denite:do_action:delete>',
+  \ 'noremap'
+\)
 
-nnoremap <C-p> :<C-u>Denite file_rec<CR>
+nnoremap <C-o> :<C-u>Denite file_rec<CR>
 nnoremap <C-f> :<C-u>Denite grep<CR>
 
 " denite-git
