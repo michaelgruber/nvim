@@ -180,8 +180,8 @@ if has('win32')
   set guifont=Source\ Code\ Pro:h11,Consolas:h11
 
   " Python virtual envs
-  let g:python3_host_prog=expand('$HOME/Envs/python3/Scripts/python.exe')
-  let g:python_host_prog=expand('$HOME/Envs/python/Scripts/python.exe')
+  let g:python3_host_prog=expand('$HOME/Envs/python37/Scripts/python.exe')
+  let g:python_host_prog=expand('$HOME/Envs/python27/Scripts/python.exe')
 
 " Unix
 elseif has('unix')
@@ -190,6 +190,10 @@ elseif has('unix')
 " OS X
   if !v:shell_error && s:uname == "Darwin"
     set guifont=Source\ Code\ Pro:h12,\ Menlo:h13
+
+    " Python virtual envs
+    let g:python3_host_prog=expand('$HOME/Envs/python37/bin/python')
+    let g:python_host_prog=expand('$HOME/Envs/python27/bin/python')
 
 " Linux
   else
