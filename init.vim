@@ -21,6 +21,8 @@ if dein#load_state(expand('$HOME/.dein'))
   call dein#add('jsfaint/gen_tags.vim')
   call dein#add('leafgarland/typescript-vim')
   call dein#add('mhartington/nvim-typescript', { 'build': './install.sh' })
+  call dein#add('neoclide/denite-git')
+  call dein#add('neoclide/vim-easygit')
   call dein#add('nsf/gocode', {'rtp': 'nvim', 'build': 'go get -u github.com/nsf/gocode'})
   call dein#add('pangloss/vim-javascript')
   call dein#add('Shougo/denite.nvim')
@@ -142,6 +144,13 @@ call denite#custom#map(
 
 nnoremap <C-p> :<C-u>Denite file_rec<CR>
 nnoremap <C-f> :<C-u>Denite grep<CR>
+
+" denite-git
+noremap <LEADER>gs :<C-u>Denite gitstatus<CR>
+noremap <LEADER>gl :<C-u>Denite gitlog<CR>
+noremap <LEADER>gla :<C-u>Denite gitlog:all<CR>
+noremap <LEADER>glf :<C-u>Denite gitlog::fix<CR>
+
 
 " gen_tags.vim
 let g:loaded_gentags#gtags=1
