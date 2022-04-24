@@ -14,24 +14,25 @@ if dein#load_state(expand('$HOME/.dein'))
   call dein#add(expand('$HOME/.dein/repos/github.com/Shougo/dein.vim'))
 
   " Plugins
-  call dein#add('carlitux/deoplete-ternjs', { 'rev': 'proc-init', 'build': 'yarn global add tern' })
-  call dein#add('fatih/vim-go')
-  call dein#add('ianks/vim-tsx')
   call dein#add('icymind/NeoSolarized')
-  call dein#add('jparise/vim-graphql')
-  call dein#add('jsfaint/gen_tags.vim')
-  call dein#add('leafgarland/typescript-vim')
-  call dein#add('mhartington/nvim-typescript', { 'build': './install.sh' })
-  call dein#add('neoclide/denite-git')
-  call dein#add('neoclide/vim-easygit')
-  call dein#add('nsf/gocode', {'rtp': 'nvim', 'build': 'go get -u github.com/nsf/gocode'})
-  call dein#add('pangloss/vim-javascript')
-  call dein#add('Shougo/denite.nvim')
-  call dein#add('Shougo/deoplete-clangx')
-  call dein#add('Shougo/deoplete.nvim')
-  call dein#add('Shougo/neoinclude.vim')
-  call dein#add('thinca/vim-qfreplace')
-  call dein#add('zchee/deoplete-go')
+  call dein#add('neovim/nvim-lspconfig')
+
+  call dein#add('Shougo/ddc.vim')
+  call dein#add('Shougo/ddu.vim')
+  call dein#add('Shougo/pum.vim')
+  call dein#add('vim-denops/denops.vim')
+
+  call dein#add('Shougo/ddc-matcher_head')
+  call dein#add('Shougo/ddc-nvim-lsp')
+  call dein#add('Shougo/ddc-path.vim')
+  call dein#add('Shougo/ddc-sorter_rank')
+  call dein#add('Shougo/neco-vim')
+
+  call dein#add('Shougo/ddu-ui-ff')
+  call dein#add('Shougo/ddu-kind-file')
+  call dein#add('Shougo/ddu-filter-matcher_substring')
+  call dein#add('Shougo/ddu-source-file')
+  call dein#add('Shougo/ddu-source-file_rec')
 
   call dein#end()
   call dein#save_state()
@@ -97,91 +98,107 @@ function InitWorkspace()
 endfunction
 nnoremap <LEADER>t :call InitWorkspace()<CR>
 
-" deoplete.nvim
-let g:deoplete#enable_at_startup = 1
+" Shougo/pum.vim
+inoremap <Tab>   <Cmd>call pum#map#insert_relative(+1)<CR>
+inoremap <S-Tab> <Cmd>call pum#map#insert_relative(-1)<CR>
+inoremap <C-n>   <Cmd>call pum#map#insert_relative(+1)<CR>
+inoremap <C-p>   <Cmd>call pum#map#insert_relative(-1)<CR>
+inoremap <C-y>   <Cmd>call pum#map#confirm()<CR>
+inoremap <C-e>   <Cmd>call pum#map#cancel()<CR>
+inoremap <PageDown> <Cmd>call pum#map#insert_relative_page(+1)<CR>
+inoremap <PageUp>   <Cmd>call pum#map#insert_relative_page(-1)<CR>
 
-call deoplete#custom#source('_', 'matchers', ['matcher_fuzzy',
-  \ 'matcher_length'])
+" Shougo/ddu.vim
+call ddu#custom#patch_global({
+    \ 'ui': 'ff',
+    \ 'kindOptions': {
+    \   'file': {
+    \     'defaultAction': 'open',
+    \   },
+    \ },
+    \ 'sourceOptions': {
+    \   '_': {
+    \     'matchers': ['matcher_substring'],
+    \   },
+    \ },
+    \ 'sources': [{
+    \   'name': 'file',
+    \   'params': {}
+    \ }],
+    \ })
+" call ddu#start({'sources': [
+"     \   {'name': 'file_rec', 'params': {'path': expand('~')}}
+"     \ ]})
 
-" denite.nvim
-call denite#custom#source('tag', 'matchers', ['matcher/substring'])
+" ddc
+call ddc#custom#patch_global('sources', ['around', 'nvim-lsp'])
+call ddc#custom#patch_global('sourceOptions', {
+    \ '_': {
+    \   'matchers': ['matcher_head'],
+    \   'sorters': ['sorter_rank'],
+    \ },
+    \ 'around': { 'mark': 'A' },
+    \ 'necovim': {'mark': 'vim'},
+    \ 'nvim-lsp': {
+    \   'mark': 'lsp',
+    \   'forceCompletionPattern': '\.\w*|:\w*|->\w*'
+    \ },
+    \ })
+call ddc#custom#patch_global('sourceParams', {
+    \ 'around': { 'maxSize': 500 },
+    \ })
+call ddc#custom#patch_filetype(
+    \ ['vim'], 'sources', ['necovim'])
+call ddc#custom#patch_filetype(
+    \ ['c', 'cpp'], 'sources', ['around', 'clangd'])
+call ddc#custom#patch_filetype(['c', 'cpp'], 'sourceOptions', {
+    \ 'clangd': { 'mark': 'C' },
+    \ })
+call ddc#custom#patch_filetype('markdown', 'sourceParams', {
+    \ 'around': { 'maxSize': 100 },
+    \ })
+inoremap <silent><expr> <TAB>
+    \ ddc#map#pum_visible() ? '<C-n>' :
+    \ (col('.') <= 1 <Bar><Bar> getline('.')[col('.') - 2] =~# '\s') ?
+    \ '<TAB>' : ddc#map#manual_complete()
+inoremap <expr><S-TAB>  ddc#map#pum_visible() ? '<C-p>' : '<C-h>'
+call ddc#enable()
 
-call denite#custom#var('file_rec', 'command',
-  \ ['pt', '--follow', '--nocolor', '--nogroup', '-l', ''])
+" lspconfig
+lua << EOF
+  local opts = { noremap=true, silent=true }
+  vim.api.nvim_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
+  vim.api.nvim_set_keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
+  vim.api.nvim_set_keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+  vim.api.nvim_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
 
-call denite#custom#var('grep', 'command', ['pt'])
-call denite#custom#var('grep', 'default_opts',
-  \ ['--nogroup', '--nocolor', '--smart-case'])
-call denite#custom#var('grep', 'recursive_opts', [])
-call denite#custom#var('grep', 'pattern_opt', [])
-call denite#custom#var('grep', 'separator', ['--'])
-call denite#custom#var('grep', 'final_opts', [])
+  local on_attach = function(client, bufnr)
+    vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
-function! s:qfreplace_action(context)
-  call denite#do_action(a:context, 'quickfix', a:context['targets'])
-  call qfreplace#start('')
-  :ccl " close the quickfix window since Qfreplace is open
-endfunction
-call denite#custom#action('file', 'qfreplace', function('s:qfreplace_action'))
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+  end
 
-call denite#custom#map(
-  \ 'insert',
-  \ '<Down>',
-  \ '<denite:move_to_next_line>',
-  \ 'noremap'
-  \)
-call denite#custom#map(
-  \ 'insert',
-  \ '<Up>',
-  \ '<denite:move_to_previous_line>',
-  \ 'noremap'
-  \)
-call denite#custom#map(
-  \ 'normal',
-  \ 'r',
-  \ '<denite:do_action:qfreplace>',
-  \ 'noremap'
-  \)
-call denite#custom#map(
-  \ 'normal',
-  \ 'a',
-  \ '<denite:do_action:add>',
-  \ 'noremap'
-  \)
-call denite#custom#map(
-  \ 'normal',
-  \ 'c',
-  \ '<denite:do_action:reset>',
-  \ 'noremap'
-  \)
-call denite#custom#map(
-  \ 'normal',
-  \ 'd',
-  \ '<denite:do_action:delete>',
-  \ 'noremap'
-\)
-
-nnoremap <C-o> :<C-u>Denite file_rec<CR>
-nnoremap <C-f> :<C-u>Denite grep<CR>
-
-" denite-git
-noremap <LEADER>gs :<C-u>Denite gitstatus<CR>
-noremap <LEADER>gl :<C-u>Denite gitlog<CR>
-noremap <LEADER>gla :<C-u>Denite gitlog:all<CR>
-noremap <LEADER>glf :<C-u>Denite gitlog::fix<CR>
-
-
-" gen_tags.vim
-let g:loaded_gentags#gtags=1
-let g:gen_tags#ctags_auto_gen=1
+  local servers = { 'tsserver' }
+  for _, lsp in pairs(servers) do
+    require('lspconfig')[lsp].setup { on_attach = on_attach }
+  end
+EOF
 
 " Windows
 if has('win32')
   set guifont=Source\ Code\ Pro:h11,Consolas:h11
-
-  " Python virtual envs
-  let g:python3_host_prog=expand('$HOME/Envs/python37/Scripts/python.exe')
-  let g:python_host_prog=expand('$HOME/Envs/python27/Scripts/python.exe')
 
 " Unix
 elseif has('unix')
@@ -190,10 +207,6 @@ elseif has('unix')
 " OS X
   if !v:shell_error && s:uname == "Darwin"
     set guifont=Source\ Code\ Pro:h12,\ Menlo:h13
-
-    " Python virtual envs
-    let g:python3_host_prog=expand('$HOME/Envs/python37/bin/python')
-    let g:python_host_prog=expand('$HOME/Envs/python27/bin/python')
 
 " Linux
   else
