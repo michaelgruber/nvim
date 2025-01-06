@@ -190,7 +190,7 @@ lua << EOF
     vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
   end
 
-  local servers = { 'tsserver' }
+  local servers = { 'ts_ls' }
   for _, lsp in pairs(servers) do
     require('lspconfig')[lsp].setup { on_attach = on_attach }
   end
